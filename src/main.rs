@@ -5,14 +5,18 @@
 
 mod asset_tracking;
 mod audio;
-mod demo;
 #[cfg(feature = "dev")]
 mod dev_tools;
+mod environment;
 mod menus;
 mod screens;
 mod theme;
 
-use bevy::{asset::AssetMetaCheck, prelude::*};
+use bevy::{
+    asset::AssetMetaCheck,
+    prelude::*,
+    window::{PrimaryWindow, WindowResolution},
+};
 
 fn main() -> AppExit {
     App::new().add_plugins(AppPlugin).run()
@@ -47,7 +51,7 @@ impl Plugin for AppPlugin {
         app.add_plugins((
             asset_tracking::plugin,
             audio::plugin,
-            demo::plugin,
+            // demo::plugin,
             #[cfg(feature = "dev")]
             dev_tools::plugin,
             menus::plugin,
@@ -71,7 +75,7 @@ impl Plugin for AppPlugin {
         app.configure_sets(Update, PausableSystems.run_if(in_state(Pause(false))));
 
         // Spawn the main camera.
-        app.add_systems(Startup, spawn_camera);
+        app.add_systems(Startup, (spawn_camera, config_primary_window));
     }
 }
 
@@ -97,5 +101,25 @@ struct Pause(pub bool);
 struct PausableSystems;
 
 fn spawn_camera(mut commands: Commands) {
-    commands.spawn((Name::new("Camera"), Camera2d));
+    commands.spawn((
+        Camera2d,
+        Projection::from(OrthographicProjection {
+            near: -100.0,
+            far: 100.0,
+            // viewport_origin: todo!(),
+            scaling_mode: bevy::camera::ScalingMode::FixedVertical {
+                viewport_height: 11.0,
+            },
+            // scale: 0.8,
+            // area: todo!(),
+            ..OrthographicProjection::default_2d()
+        }),
+    ));
+}
+
+fn config_primary_window(mut windows: Query<&mut Window, With<PrimaryWindow>>) {
+    for mut window in windows.iter_mut() {
+        // window.resizable = false;
+        window.resolution = WindowResolution::new(1500, 1500);
+    }
 }

@@ -6,7 +6,7 @@ use bevy::{
     prelude::*,
 };
 
-use crate::{AppSystems, screens::Screen, theme::prelude::*};
+use crate::{AppSystems, screens::Screen, theme::widget};
 
 pub(super) fn plugin(app: &mut App) {
     // Spawn splash screen.
@@ -45,7 +45,7 @@ pub(super) fn plugin(app: &mut App) {
 
 const SPLASH_BACKGROUND_COLOR: Color = Color::srgb(0.157, 0.157, 0.157);
 const SPLASH_DURATION_SECS: f32 = 1.8;
-const SPLASH_FADE_DURATION_SECS: f32 = 0.6;
+const SPLASH_FADE_DURATION_SECS: f32 = 0.3;
 
 fn spawn_splash_screen(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
@@ -93,9 +93,10 @@ impl ImageNodeFadeInOut {
     fn alpha(&self) -> f32 {
         // Normalize by duration.
         let t = (self.t / self.total_duration).clamp(0.0, 1.0);
-        let fade = self.fade_duration / self.total_duration;
+        let fade = (2.0 * self.fade_duration) / self.total_duration;
 
         // Regular trapezoid-shaped graph, flat at the top with alpha = 1.0.
+        // https://chatgpt.com/share/68ea6a83-90ac-800d-a4a2-4a7391ef0852
         ((1.0 - (2.0 * t - 1.0).abs()) / fade).min(1.0)
     }
 }
