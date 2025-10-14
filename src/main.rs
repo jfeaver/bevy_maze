@@ -54,6 +54,7 @@ impl Plugin for AppPlugin {
             // demo::plugin,
             #[cfg(feature = "dev")]
             dev_tools::plugin,
+            environment::plugin,
             menus::plugin,
             screens::plugin,
             theme::plugin,
@@ -108,7 +109,7 @@ fn spawn_camera(mut commands: Commands) {
             far: 100.0,
             // viewport_origin: todo!(),
             scaling_mode: bevy::camera::ScalingMode::FixedVertical {
-                viewport_height: 11.0,
+                viewport_height: 11.5,
             },
             // scale: 0.8,
             // area: todo!(),
