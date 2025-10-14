@@ -108,7 +108,7 @@ pub const TILE_MAP: [[Tile; 11]; 11] = [
             obstruction: ObstructionType::None,
         },
         Tile {
-            ground: GroundType::DirtH,
+            ground: GroundType::DirtV,
             obstruction: ObstructionType::Rock2,
         },
         Tile {
@@ -216,7 +216,7 @@ pub const TILE_MAP: [[Tile; 11]; 11] = [
             obstruction: ObstructionType::Rock1,
         },
         Tile {
-            ground: GroundType::DirtV,
+            ground: GroundType::DirtH,
             obstruction: ObstructionType::None,
         },
         Tile {
@@ -236,6 +236,210 @@ pub const TILE_MAP: [[Tile; 11]; 11] = [
         Tile {
             ground: GroundType::Grass,
             obstruction: ObstructionType::WallV,
+        },
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::None,
+        },
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::None,
+        },
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::None,
+        },
+        Tile {
+            ground: GroundType::DirtV,
+            obstruction: ObstructionType::None,
+        },
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::None,
+        },
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::None,
+        },
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::None,
+        },
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::None,
+        },
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::None,
+        },
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::WallV,
+        },
+    ],
+    [
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::WallV,
+        },
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::None,
+        },
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::None,
+        },
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::None,
+        },
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::None,
+        },
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::None,
+        },
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::None,
+        },
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::None,
+        },
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::None,
+        },
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::None,
+        },
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::WallV,
+        },
+    ],
+    [
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::Tower,
+        },
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::WallH,
+        },
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::WallH,
+        },
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::WallH,
+        },
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::WallH,
+        },
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::WallH,
+        },
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::WallH,
+        },
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::Tower,
+        },
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::None,
+        },
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::None,
+        },
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::WallV,
+        },
+    ],
+    [
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::None,
+        },
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::None,
+        },
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::None,
+        },
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::None,
+        },
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::None,
+        },
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::None,
+        },
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::None,
+        },
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::None,
+        },
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::None,
+        },
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::None,
+        },
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::WallV,
+        },
+    ],
+    [
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::None,
+        },
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::None,
+        },
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::None,
+        },
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::None,
+        },
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::None,
+        },
+        Tile {
+            ground: GroundType::Grass,
+            obstruction: ObstructionType::None,
         },
         Tile {
             ground: GroundType::Grass,
@@ -251,210 +455,6 @@ pub const TILE_MAP: [[Tile; 11]; 11] = [
         },
         Tile {
             ground: GroundType::DirtH,
-            obstruction: ObstructionType::None,
-        },
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::None,
-        },
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::None,
-        },
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::None,
-        },
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::None,
-        },
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::None,
-        },
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::WallV,
-        },
-    ],
-    [
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::WallV,
-        },
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::None,
-        },
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::None,
-        },
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::None,
-        },
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::None,
-        },
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::None,
-        },
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::None,
-        },
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::None,
-        },
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::None,
-        },
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::None,
-        },
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::WallV,
-        },
-    ],
-    [
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::Tower,
-        },
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::WallH,
-        },
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::WallH,
-        },
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::WallH,
-        },
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::WallH,
-        },
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::WallH,
-        },
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::WallH,
-        },
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::Tower,
-        },
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::None,
-        },
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::None,
-        },
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::WallV,
-        },
-    ],
-    [
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::None,
-        },
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::None,
-        },
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::None,
-        },
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::None,
-        },
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::None,
-        },
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::None,
-        },
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::None,
-        },
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::None,
-        },
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::None,
-        },
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::None,
-        },
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::WallV,
-        },
-    ],
-    [
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::None,
-        },
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::None,
-        },
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::None,
-        },
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::None,
-        },
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::None,
-        },
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::None,
-        },
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::None,
-        },
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::None,
-        },
-        Tile {
-            ground: GroundType::Grass,
-            obstruction: ObstructionType::None,
-        },
-        Tile {
-            ground: GroundType::DirtV,
             obstruction: ObstructionType::None,
         },
         Tile {

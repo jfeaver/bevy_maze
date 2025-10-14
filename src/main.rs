@@ -14,6 +14,7 @@ mod theme;
 
 use bevy::{
     asset::AssetMetaCheck,
+    diagnostic::FrameCount,
     prelude::*,
     window::{PrimaryWindow, WindowResolution},
 };
@@ -37,14 +38,21 @@ impl Plugin for AppPlugin {
                     ..default()
                 })
                 .set(WindowPlugin {
-                    primary_window: Window {
+                    primary_window: Some(Window {
                         title: "Maze".to_string(),
+                        name: Some("Maze".into()),
+                        resolution: WindowResolution::new(1150, 1150),
+                        position: WindowPosition::Centered(MonitorSelection::Current),
+                        // Tells Wasm to resize the window according to the available canvas
                         fit_canvas_to_parent: true,
+                        // Tells Wasm not to override default event handling, like F5, Ctrl+R etc.
+                        prevent_default_event_handling: false,
+                        visible: false,
                         ..default()
-                    }
-                    .into(),
+                    }),
                     ..default()
-                }),
+                })
+                .set(ImagePlugin::default_nearest()),
         );
 
         // Add other plugins.
@@ -76,7 +84,9 @@ impl Plugin for AppPlugin {
         app.configure_sets(Update, PausableSystems.run_if(in_state(Pause(false))));
 
         // Spawn the main camera.
-        app.add_systems(Startup, (spawn_camera, config_primary_window));
+        app.add_systems(Startup, spawn_camera);
+        // Configure the window just after loading
+        app.add_systems(Update, show_and_config_primary_window);
     }
 }
 
@@ -118,9 +128,18 @@ fn spawn_camera(mut commands: Commands) {
     ));
 }
 
-fn config_primary_window(mut windows: Query<&mut Window, With<PrimaryWindow>>) {
-    for mut window in windows.iter_mut() {
-        // window.resizable = false;
-        window.resolution = WindowResolution::new(1500, 1500);
+fn show_and_config_primary_window(mut window: Single<&mut Window>, frames: Res<FrameCount>) {
+    if frames.0 == 1 {
+        window.resolution = WindowResolution::new(1150, 1150);
+    }
+    if frames.0 == 2 {
+        window.position = WindowPosition::Centered(MonitorSelection::Current);
+    }
+    // The delay may be different for your app or system.
+    if frames.0 == 3 {
+        // At this point the gpu is ready to show the app so we can make the window visible.
+        // Alternatively, you could toggle the visibility in Startup.
+        // It will work, but it will have one white frame before it starts rendering
+        window.visible = true;
     }
 }
