@@ -1,38 +1,46 @@
 // The meat and potatoes module. Where the fun stuff lives.
 
-use crate::{gameplay::environment::WorldMap, screens::Screen};
+use crate::{PIXELS_PER_TILE, gameplay::environment::WorldMap, screens::Screen};
 use bevy::prelude::*;
 
 mod environment;
+mod movement;
+mod player;
+mod utils;
 
-const TILE_DIM: f32 = 1.0;
-const PIXELS_PER_TILE: f32 = 16.0;
-const SCALE_FACTOR: f32 = 1.0 / PIXELS_PER_TILE;
+const SCALE_FACTOR: f32 = 1.0 / PIXELS_PER_TILE as f32;
 
-#[derive(Resource)]
+#[derive(Resource, Asset, Clone, Reflect)]
 pub struct SpriteSheet {
     texture: Handle<Image>,
     layout: Handle<TextureAtlasLayout>,
 }
 
-pub(super) fn plugin(app: &mut App) {
-    app.init_resource::<WorldMap>();
-    app.add_systems(Startup, load_assets);
+trait AtlasIndex {
+    fn atlas_index(&self) -> Option<usize>;
 }
 
-fn load_assets(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-    mut atlases: ResMut<Assets<TextureAtlasLayout>>,
-) {
-    let texture = asset_server.load("textures/tileset.png");
-    let layout = TextureAtlasLayout::from_grid(UVec2::splat(16), 15, 15, None, None);
-    let layout_handle = atlases.add(layout);
+pub(super) fn plugin(app: &mut App) {
+    app.init_resource::<WorldMap>();
+    app.init_resource::<SpriteSheet>();
+    app.add_plugins((player::plugin, movement::plugin));
+}
 
-    commands.insert_resource(SpriteSheet {
-        texture,
-        layout: layout_handle,
-    });
+impl FromWorld for SpriteSheet {
+    fn from_world(world: &mut World) -> Self {
+        let texture = { world.resource::<AssetServer>().load("textures/tileset.png") };
+        let mut atlases = world.resource_mut::<Assets<TextureAtlasLayout>>();
+        Self {
+            texture,
+            layout: atlases.add(TextureAtlasLayout::from_grid(
+                UVec2::splat(16),
+                15,
+                15,
+                None,
+                None,
+            )),
+        }
+    }
 }
 
 // A system that spawns the static world elements around the player
@@ -57,7 +65,11 @@ pub(crate) fn spawn_environment(
         });
 }
 
-fn sprite_bundle(sheet: &Res<SpriteSheet>, atlas_index: usize, translation: Vec3) -> impl Bundle {
+fn sprite_bundle(
+    sheet: &Res<SpriteSheet>,
+    atlas_index: usize,
+    translation: Vec3,
+) -> (Sprite, Transform) {
     (
         Sprite::from_atlas_image(
             sheet.texture.clone(),

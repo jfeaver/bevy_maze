@@ -24,7 +24,7 @@ OBSTRUCTION_MAP = {
 
 GROUND_CSV = "/Users/nathan/art/TLoAsh/Tiled/trial_Ground.csv"
 OBSTRUCTION_CSV = "/Users/nathan/art/TLoAsh/Tiled/trial_Walls.csv"
-OUTPUT_RS = "/Users/nathan/personal/bevy_maze/src/environment/world_map_array.rs"
+OUTPUT_RS = "/Users/nathan/personal/bevy_maze/src/gameplay/environment/world_map_array.rs"
 
 
 def read_csv(path: str):
@@ -67,7 +67,13 @@ def main():
     rust_output = (
         "// Auto-generated tile map\n"
         "use super::{GroundType, ObstructionType, Tile};\n\n"
-        "pub const TILE_MAP: [[Tile; 11]; 11] = " + rust_matrix + "\n"
+        "pub const TILE_MAP: [[Tile; "
+        + str(len(ground))
+        + "]; "
+        + str(len(ground[0]))
+        + "] = "
+        + rust_matrix
+        + "\n"
     )
 
     with open(OUTPUT_RS, "w") as f:

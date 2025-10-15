@@ -2,7 +2,10 @@
 
 use bevy::prelude::*;
 
-use crate::gameplay::TILE_DIM;
+use crate::{
+    SCREEN_DIM,
+    gameplay::{AtlasIndex, utils::coordinate_translation},
+};
 
 mod world_map_array;
 
@@ -22,10 +25,6 @@ pub(in crate::gameplay) enum ObstructionType {
     Rock1,
     Rock2,
     Rock3,
-}
-
-trait AtlasIndex {
-    fn atlas_index(&self) -> Option<usize>;
 }
 
 impl AtlasIndex for GroundType {
@@ -61,7 +60,8 @@ pub(crate) struct Tile {
 #[derive(Resource, Reflect, Debug)]
 #[reflect(Resource)]
 pub(crate) struct WorldMap {
-    pub(crate) grid: [[Tile; 11]; 11],
+    // The world is one screen square at the moment.
+    pub(crate) grid: [[Tile; SCREEN_DIM as usize]; SCREEN_DIM as usize],
 }
 
 impl Default for WorldMap {
@@ -86,10 +86,7 @@ pub(super) fn local_environment_objects<'a>(
                 .iter()
                 .enumerate()
                 .flat_map(move |(column, tile)| {
-                    let base_translation = Vec2::new(
-                        (column as f32 - 5.0) * TILE_DIM,
-                        (-(row as f32) + 5.0) * TILE_DIM,
-                    );
+                    let base_translation = coordinate_translation(column, row);
 
                     let mut entries = Vec::new();
 

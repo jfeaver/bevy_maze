@@ -14,6 +14,11 @@ mod theme;
 
 use bevy::{asset::AssetMetaCheck, diagnostic::FrameCount, prelude::*, window::WindowResolution};
 
+// Number of tiles (square) that fit on screen
+const SCREEN_DIM: u8 = 11;
+const SCREEN_PADDING: f32 = 0.5;
+const PIXELS_PER_TILE: u8 = 16;
+
 fn main() -> AppExit {
     App::new().add_plugins(AppPlugin).run()
 }
@@ -36,8 +41,6 @@ impl Plugin for AppPlugin {
                     primary_window: Some(Window {
                         title: "Maze".to_string(),
                         name: Some("Maze".into()),
-                        resolution: WindowResolution::new(1150, 1150),
-                        position: WindowPosition::Centered(MonitorSelection::Current),
                         // Tells Wasm to resize the window according to the available canvas
                         fit_canvas_to_parent: true,
                         // Tells Wasm not to override default event handling, like F5, Ctrl+R etc.
@@ -113,7 +116,7 @@ fn spawn_camera(mut commands: Commands) {
             far: 100.0,
             // viewport_origin: todo!(),
             scaling_mode: bevy::camera::ScalingMode::FixedVertical {
-                viewport_height: 11.5,
+                viewport_height: (SCREEN_DIM as f32 + SCREEN_PADDING),
             },
             // scale: 0.8,
             // area: todo!(),
@@ -123,8 +126,9 @@ fn spawn_camera(mut commands: Commands) {
 }
 
 fn show_and_config_primary_window(mut window: Single<&mut Window>, frames: Res<FrameCount>) {
+    let screen_px = ((SCREEN_DIM as f32 + SCREEN_PADDING) * (PIXELS_PER_TILE as f32) * 9.0) as u32;
     if frames.0 == 1 {
-        window.resolution = WindowResolution::new(1150, 1150);
+        window.resolution = WindowResolution::new(screen_px, screen_px);
     }
     if frames.0 == 2 {
         window.position = WindowPosition::Centered(MonitorSelection::Current);
