@@ -7,17 +7,12 @@ mod asset_tracking;
 mod audio;
 #[cfg(feature = "dev")]
 mod dev_tools;
-mod environment;
+mod gameplay;
 mod menus;
 mod screens;
 mod theme;
 
-use bevy::{
-    asset::AssetMetaCheck,
-    diagnostic::FrameCount,
-    prelude::*,
-    window::{PrimaryWindow, WindowResolution},
-};
+use bevy::{asset::AssetMetaCheck, diagnostic::FrameCount, prelude::*, window::WindowResolution};
 
 fn main() -> AppExit {
     App::new().add_plugins(AppPlugin).run()
@@ -59,10 +54,9 @@ impl Plugin for AppPlugin {
         app.add_plugins((
             asset_tracking::plugin,
             audio::plugin,
-            // demo::plugin,
             #[cfg(feature = "dev")]
             dev_tools::plugin,
-            environment::plugin,
+            gameplay::plugin,
             menus::plugin,
             screens::plugin,
             theme::plugin,
