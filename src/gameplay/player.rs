@@ -3,8 +3,7 @@ use bevy::prelude::*;
 use crate::{
     AppSystems, PausableSystems,
     gameplay::{
-        AtlasIndex, SpriteSheet, movement::MovementController, sprite_bundle,
-        utils::coordinate_translation,
+        AtlasIndex, SpriteSheet, movement::MovementController, utils::coordinate_translation,
     },
     screens::Screen,
 };
@@ -20,17 +19,21 @@ pub(super) fn plugin(app: &mut App) {
 }
 
 fn add_player(mut commands: Commands, sheet: Res<SpriteSheet>) {
-    let (sprite, transform): (Sprite, Transform) = sprite_bundle(
-        &sheet,
-        Player.atlas_index().unwrap_or(0),
-        coordinate_translation(5, 1).extend(2.0),
-    );
-
     commands.spawn((
         Name::new("Player"),
         Player,
-        sprite,
-        transform,
+        Sprite::from_atlas_image(
+            sheet.texture.clone(),
+            TextureAtlas {
+                layout: sheet.layout.clone(),
+                index: Player.atlas_index().unwrap_or(0),
+            },
+        ),
+        Transform {
+            translation: coordinate_translation(5, 1).extend(2.0),
+            scale: Vec3::splat(crate::gameplay::SCALE_FACTOR),
+            ..Default::default()
+        },
         MovementController::default(),
     ));
 }
