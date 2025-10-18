@@ -74,9 +74,7 @@ impl Default for WorldMap {
 
 /// Returns an iterator over (translation, atlas_index_with_depth) for all visible environment tiles.
 /// Each tile may contribute up to two sprites: ground (z=0.0) and obstruction (z=1.0).
-pub(super) fn local_environment_objects<'a>(
-    world_map: &'a WorldMap,
-) -> impl Iterator<Item = (Vec3, usize)> + 'a {
+pub(super) fn local_environment_objects(world_map: &WorldMap) -> impl Iterator<Item = (Vec2, u16)> {
     world_map
         .grid
         .iter()
@@ -91,11 +89,11 @@ pub(super) fn local_environment_objects<'a>(
                     let mut entries = Vec::new();
 
                     if let Some(index) = tile.ground.atlas_index() {
-                        entries.push((base_translation.extend(0.0), index));
+                        entries.push((base_translation, index as u16));
                     }
 
                     if let Some(index) = tile.obstruction.atlas_index() {
-                        entries.push((base_translation.extend(1.0), index));
+                        entries.push((base_translation, index as u16));
                     }
 
                     entries

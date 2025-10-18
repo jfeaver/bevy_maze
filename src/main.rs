@@ -11,6 +11,7 @@ mod gameplay;
 mod menus;
 mod screens;
 mod theme;
+mod utils;
 
 use bevy::{asset::AssetMetaCheck, diagnostic::FrameCount, prelude::*, window::WindowResolution};
 

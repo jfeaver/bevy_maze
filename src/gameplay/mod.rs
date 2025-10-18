@@ -1,7 +1,11 @@
 // The meat and potatoes module. Where the fun stuff lives.
 
-use crate::{PIXELS_PER_TILE, gameplay::environment::WorldMap};
-use bevy::{asset::RenderAssetUsages, prelude::*};
+use crate::{
+    PIXELS_PER_TILE,
+    gameplay::environment::WorldMap,
+    utils::tile_mesh::{AtlasConfig, build_tile_mesh},
+};
+use bevy::prelude::*;
 
 mod environment;
 mod movement;
@@ -9,8 +13,8 @@ mod player;
 mod utils;
 
 const SCALE_FACTOR: f32 = 1.0 / PIXELS_PER_TILE as f32;
-const ATLAS_COLS: usize = 15;
-const ATLAS_ROWS: usize = 15;
+const ATLAS_COLS: u16 = 15;
+const ATLAS_ROWS: u16 = 15;
 
 #[derive(Resource, Asset, Clone, Reflect)]
 pub struct SpriteSheet {
@@ -53,53 +57,22 @@ pub(crate) fn spawn_environment(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
-    let mut mesh = Mesh::new(
-        bevy::render::render_resource::PrimitiveTopology::TriangleList,
-        RenderAssetUsages::RENDER_WORLD,
+    let tile_size = 1.0;
+    let tile_mesh = build_tile_mesh(
+        crate::gameplay::environment::local_environment_objects(&world_map),
+        &AtlasConfig {
+            cols: ATLAS_COLS,
+            rows: ATLAS_ROWS,
+        },
+        tile_size,
+        &mut meshes,
     );
-    let mut positions: Vec<[f32; 3]> = Vec::new();
-    let mut uvs: Vec<[f32; 2]> = Vec::new();
-    let mut indices: Vec<u32> = Vec::new();
-
-    let mut i: u32 = 0;
-    for (translation, sprite_index) in
-        crate::gameplay::environment::local_environment_objects(&world_map)
-    {
-        let tile_size = 1.0;
-        let offset_x = translation.x - tile_size / 2.0;
-        let offset_y = translation.y - tile_size / 2.0;
-
-        let u = (sprite_index % ATLAS_COLS) as f32 / ATLAS_COLS as f32;
-        let v = (sprite_index / ATLAS_COLS) as f32 / ATLAS_ROWS as f32;
-        let du = 1.0 / ATLAS_COLS as f32;
-        let dv = 1.0 / ATLAS_ROWS as f32;
-
-        // quad positions
-        positions.extend([
-            [offset_x, offset_y, 0.0],
-            [offset_x + tile_size, offset_y, 0.0],
-            [offset_x + tile_size, offset_y + tile_size, 0.0],
-            [offset_x, offset_y + tile_size, 0.0],
-        ]);
-
-        // UVs into the atlas
-        uvs.extend([[u, v + dv], [u + du, v + dv], [u + du, v], [u, v]]);
-
-        indices.extend([i, i + 1, i + 2, i, i + 2, i + 3]);
-        i += 4;
-    }
-
-    mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, positions);
-    mesh.insert_attribute(Mesh::ATTRIBUTE_UV_0, uvs);
-    mesh.insert_indices(bevy::mesh::Indices::U32(indices));
-
-    let mesh_handle = meshes.add(mesh);
 
     let material = materials.add(ColorMaterial::from(sheet.texture.clone()));
 
     commands.spawn((
         Name::new("Environment"),
-        Mesh2d(mesh_handle),
+        Mesh2d(tile_mesh),
         MeshMaterial2d(material),
     ));
 }
