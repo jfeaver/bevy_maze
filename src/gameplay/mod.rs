@@ -74,5 +74,6 @@ pub(crate) fn spawn_environment(
         Name::new("Environment"),
         Mesh2d(tile_mesh),
         MeshMaterial2d(material),
+        Transform::from_xyz(0.0, -1.0, 0.0), // Account for Bevy using Y-Up coordinates and us using Y-Down
     ));
 }

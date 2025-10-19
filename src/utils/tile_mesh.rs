@@ -6,6 +6,8 @@ pub struct AtlasConfig {
     pub rows: u16,
 }
 
+// Consider using a builder struct to allow for the option to use y-down coordinate systems
+// although... that's not the Bevy way so maybe not?
 pub fn build_tile_mesh(
     tiles: impl Iterator<Item = (Vec2, u16)>,
     atlas: &AtlasConfig,
@@ -22,14 +24,20 @@ pub fn build_tile_mesh(
 
     let mut i: u16 = 0;
     for (translation, sprite_index) in tiles {
-        let offset_x = translation.x - tile_size / 2.0;
-        let offset_y = translation.y - tile_size / 2.0;
+        let offset_x = translation.x;
+        let offset_y = translation.y;
 
         let u = (sprite_index % atlas.cols) as f32 / atlas.cols as f32;
         let v = (sprite_index / atlas.cols) as f32 / atlas.rows as f32;
         let du = 1.0 / atlas.cols as f32;
         let dv = 1.0 / atlas.rows as f32;
 
+        // Associate positions on the mesh with coordinates on the texture atlas.
+        // Each element of the positions vector corresponds to the same element of the uvs vector.
+        // The indices vector is read three elements at a time and then a triangle is drawn by looking
+        // up the elements in positions and uvs using the three elements/indices.
+
+        // quad positions (positions on the rendered mesh)
         positions.extend([
             [offset_x, offset_y, 0.0],
             [offset_x + tile_size, offset_y, 0.0],
@@ -37,6 +45,7 @@ pub fn build_tile_mesh(
             [offset_x, offset_y + tile_size, 0.0],
         ]);
 
+        // UVs into the atlas (vertex coordinates on the texture)
         uvs.extend([[u, v + dv], [u + du, v + dv], [u + du, v], [u, v]]);
         indices.extend([i, i + 1, i + 2, i, i + 2, i + 3]);
         i += 4;

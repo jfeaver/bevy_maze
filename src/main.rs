@@ -113,8 +113,6 @@ fn spawn_camera(mut commands: Commands) {
     commands.spawn((
         Camera2d,
         Projection::from(OrthographicProjection {
-            near: -100.0,
-            far: 100.0,
             // viewport_origin: todo!(),
             scaling_mode: bevy::camera::ScalingMode::FixedVertical {
                 viewport_height: (SCREEN_DIM as f32 + SCREEN_PADDING),

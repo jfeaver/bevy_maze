@@ -3,8 +3,8 @@
 use bevy::prelude::*;
 
 use crate::{
-    SCREEN_DIM,
-    gameplay::{AtlasIndex, utils::coordinate_translation},
+    SCREEN_DIM as MAP_DIM,
+    gameplay::{AtlasIndex, utils::render_position_from_world_array_position},
 };
 
 mod world_map_array;
@@ -16,7 +16,7 @@ pub(in crate::gameplay) enum GroundType {
     DirtH,
 }
 
-#[derive(Reflect, Debug)]
+#[derive(Reflect, Debug, PartialEq)]
 pub(in crate::gameplay) enum ObstructionType {
     None,
     WallV,
@@ -57,11 +57,32 @@ pub(crate) struct Tile {
     obstruction: ObstructionType,
 }
 
+impl Tile {
+    pub fn is_obstruction(&self) -> bool {
+        self.obstruction != ObstructionType::None
+    }
+}
+
 #[derive(Resource, Reflect, Debug)]
 #[reflect(Resource)]
 pub(crate) struct WorldMap {
     // The world is one screen square at the moment.
-    pub(crate) grid: [[Tile; SCREEN_DIM as usize]; SCREEN_DIM as usize],
+    pub(crate) grid: [[Tile; MAP_DIM as usize]; MAP_DIM as usize],
+}
+
+impl WorldMap {
+    // Provide a position in world array coordinates
+    pub fn at(&self, position: Vec2) -> Option<&Tile> {
+        let x = position.x.floor() as isize;
+        let y = position.y.floor() as isize;
+
+        // Ensure coordinates are within grid bounds
+        if x >= 0 && y >= 0 && x < MAP_DIM as isize && y < MAP_DIM as isize {
+            Some(&self.grid[y as usize][x as usize])
+        } else {
+            None
+        }
+    }
 }
 
 impl Default for WorldMap {
@@ -84,7 +105,8 @@ pub(super) fn local_environment_objects(world_map: &WorldMap) -> impl Iterator<I
                 .iter()
                 .enumerate()
                 .flat_map(move |(column, tile)| {
-                    let base_translation = coordinate_translation(column, row);
+                    let base_translation =
+                        render_position_from_world_array_position(column as f32, row as f32);
 
                     let mut entries = Vec::new();
 
