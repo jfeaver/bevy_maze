@@ -3,9 +3,8 @@ use bevy::{color::Srgba, prelude::*, sprite::Anchor};
 use crate::{
     AppSystems, PausableSystems,
     gameplay::{
-        AtlasIndex, SpriteSheet,
-        movement::MovementController,
-        utils::{Hitbox, render_position_from_world_array_position},
+        AtlasIndex, SpriteSheet, movement::MovementController,
+        utils::render_position_from_world_array_position,
     },
     screens::Screen,
 };
@@ -19,10 +18,10 @@ pub(super) fn plugin(app: &mut App) {
     );
     app.add_systems(OnEnter(Screen::Gameplay), spawn_player_anchor);
     app.add_systems(Update, update_player_anchor);
-    app.add_systems(OnEnter(Screen::Gameplay), add_player);
+    app.add_systems(OnEnter(Screen::Gameplay), spawn_player);
 }
 
-fn add_player(mut commands: Commands, sheet: Res<SpriteSheet>) {
+fn spawn_player(mut commands: Commands, sheet: Res<SpriteSheet>) {
     commands.spawn((
         Name::new("Player"),
         Player,
@@ -40,7 +39,7 @@ fn add_player(mut commands: Commands, sheet: Res<SpriteSheet>) {
             ..Default::default()
         },
         MovementController {
-            hitbox: Some(Hitbox::new(Rect::from_corners(Vec2::ZERO, Vec2::ONE))),
+            girth: Some(Vec2::ONE),
             ..Default::default()
         },
     ));

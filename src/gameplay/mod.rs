@@ -12,7 +12,9 @@ mod movement;
 mod player;
 mod utils;
 
-const SCALE_FACTOR: f32 = 1.0 / PIXELS_PER_TILE as f32;
+const TILE_DIM: f32 = 1.0;
+const HALF_TILE_DIM: f32 = TILE_DIM / 2.0;
+const SCALE_FACTOR: f32 = TILE_DIM / PIXELS_PER_TILE as f32;
 const ATLAS_COLS: u16 = 15;
 const ATLAS_ROWS: u16 = 15;
 
@@ -57,14 +59,13 @@ pub(crate) fn spawn_environment(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
-    let tile_size = 1.0;
     let tile_mesh = build_tile_mesh(
         crate::gameplay::environment::local_environment_objects(&world_map),
         &AtlasConfig {
             cols: ATLAS_COLS,
             rows: ATLAS_ROWS,
         },
-        tile_size,
+        TILE_DIM,
         &mut meshes,
     );
 
@@ -74,6 +75,6 @@ pub(crate) fn spawn_environment(
         Name::new("Environment"),
         Mesh2d(tile_mesh),
         MeshMaterial2d(material),
-        Transform::from_xyz(0.0, -1.0, 0.0), // Account for Bevy using Y-Up coordinates and us using Y-Down
+        Transform::from_xyz(0.0, -TILE_DIM, 0.0), // Account for Bevy using Y-Up coordinates and us using Y-Down
     ));
 }

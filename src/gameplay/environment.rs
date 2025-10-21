@@ -1,12 +1,17 @@
 // draw the static environment
 
 use bevy::prelude::*;
+use coordinate::Coordinate;
 
 use crate::{
     SCREEN_DIM as MAP_DIM,
-    gameplay::{AtlasIndex, utils::render_position_from_world_array_position},
+    gameplay::{
+        AtlasIndex, TILE_DIM,
+        utils::{hitbox::Hitbox, render_position_from_world_array_position},
+    },
 };
 
+pub mod coordinate;
 mod world_map_array;
 
 #[derive(Reflect, Debug)]
@@ -61,6 +66,13 @@ impl Tile {
     pub fn is_obstruction(&self) -> bool {
         self.obstruction != ObstructionType::None
     }
+
+    pub fn hitbox(&self, coordinate: Coordinate) -> Hitbox {
+        Hitbox::from_corners(
+            Vec2::from(coordinate),
+            Vec2::from(coordinate) + Vec2::splat(TILE_DIM),
+        )
+    }
 }
 
 #[derive(Resource, Reflect, Debug)]
@@ -72,13 +84,16 @@ pub(crate) struct WorldMap {
 
 impl WorldMap {
     // Provide a position in world array coordinates
-    pub fn at(&self, position: Vec2) -> Option<&Tile> {
-        let x = position.x.floor() as isize;
-        let y = position.y.floor() as isize;
-
+    pub fn at(&self, coordinate: Coordinate) -> Option<&Tile> {
         // Ensure coordinates are within grid bounds
-        if x >= 0 && y >= 0 && x < MAP_DIM as isize && y < MAP_DIM as isize {
-            Some(&self.grid[y as usize][x as usize])
+        debug!("WorldMap.at({:?})", coordinate);
+
+        if coordinate.x < MAP_DIM as i32
+            && coordinate.x >= 0
+            && coordinate.y < MAP_DIM as i32
+            && coordinate.y >= 0
+        {
+            Some(&self.grid[coordinate.y as usize][coordinate.x as usize])
         } else {
             None
         }

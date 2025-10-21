@@ -8,10 +8,12 @@ pub struct AtlasConfig {
 
 // Consider using a builder struct to allow for the option to use y-down coordinate systems
 // although... that's not the Bevy way so maybe not?
+
+/// tile_dim is the size of one side of a square tile in world units.
 pub fn build_tile_mesh(
     tiles: impl Iterator<Item = (Vec2, u16)>,
     atlas: &AtlasConfig,
-    tile_size: f32,
+    tile_dim: f32,
     meshes: &mut Assets<Mesh>,
 ) -> Handle<Mesh> {
     let mut mesh = Mesh::new(
@@ -40,9 +42,9 @@ pub fn build_tile_mesh(
         // quad positions (positions on the rendered mesh)
         positions.extend([
             [offset_x, offset_y, 0.0],
-            [offset_x + tile_size, offset_y, 0.0],
-            [offset_x + tile_size, offset_y + tile_size, 0.0],
-            [offset_x, offset_y + tile_size, 0.0],
+            [offset_x + tile_dim, offset_y, 0.0],
+            [offset_x + tile_dim, offset_y + tile_dim, 0.0],
+            [offset_x, offset_y + tile_dim, 0.0],
         ]);
 
         // UVs into the atlas (vertex coordinates on the texture)
