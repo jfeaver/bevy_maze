@@ -4,6 +4,8 @@ use bevy::{
     reflect::Reflect,
 };
 
+use crate::gameplay::utils::round_out_float_noise;
+
 /// A simple hitbox wrapper around `bevy::math::Rect<f32>` that exposes
 /// convenient x1/y1/x2/y2 getters (and a few helpers).
 #[derive(Debug, Clone, Copy, Component, Reflect)]
@@ -24,6 +26,12 @@ impl Hitbox {
     pub fn from_corners(p0: Vec2, p1: Vec2) -> Self {
         Self {
             rect: Rect::from_corners(p0, p1),
+        }
+    }
+
+    pub fn from_rounded_corners(p0: Vec2, p1: Vec2) -> Self {
+        Self {
+            rect: Rect::from_corners(p0.map(round_out_float_noise), p1.map(round_out_float_noise)),
         }
     }
 
@@ -71,10 +79,10 @@ impl Hitbox {
 
     /// AABB intersection test with another hitbox.
     pub fn intersects(&self, other: &Hitbox) -> bool {
-        !(self.x2() < other.x1()
-            || self.x1() > other.x2()
-            || self.y2() < other.y1()
-            || self.y1() > other.y2())
+        self.y1() < other.y2()
+            && self.y2() > other.y1()
+            && self.x1() < other.x2()
+            && self.x2() > other.x1()
     }
 
     // /// Replace the underlying rect.

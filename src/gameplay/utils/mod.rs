@@ -50,3 +50,7 @@ where
 {
     -val
 }
+
+fn round_out_float_noise(n: f32) -> f32 {
+    (n * 10000.0).round() / 10000.0
+}

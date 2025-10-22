@@ -3,7 +3,7 @@ use bevy::{color::Srgba, prelude::*, sprite::Anchor};
 use crate::{
     AppSystems, PausableSystems,
     gameplay::{
-        AtlasIndex, SpriteSheet, movement::MovementController,
+        AtlasIndex, SpriteSheet, TILE_DIM, movement::MovementController,
         utils::render_position_from_world_array_position,
     },
     screens::Screen,
@@ -32,14 +32,15 @@ fn spawn_player(mut commands: Commands, sheet: Res<SpriteSheet>) {
                 index: Player.atlas_index().unwrap_or(0),
             },
         ),
-        Anchor::TOP_LEFT,
+        Anchor::CENTER,
         Transform {
-            translation: render_position_from_world_array_position(5.0, 1.0).extend(2.0),
+            translation: render_position_from_world_array_position(6.5 * TILE_DIM, 8.5 * TILE_DIM)
+                .extend(2.0),
             scale: Vec3::splat(crate::gameplay::SCALE_FACTOR),
             ..Default::default()
         },
         MovementController {
-            girth: Some(Vec2::ONE),
+            girth: Some(Vec2::ONE * 0.8 * TILE_DIM),
             ..Default::default()
         },
     ));
@@ -97,9 +98,9 @@ fn spawn_player_anchor(
     commands.spawn((
         Name::new("Player Anchor"),
         PlayerAnchor,
-        Mesh2d(meshes.add(Circle::new(0.1))),
+        Mesh2d(meshes.add(Circle::new(0.03 * TILE_DIM))),
         MeshMaterial2d(materials.add(ColorMaterial::from_color(Srgba::new(1.0, 0.0, 0.0, 1.0)))),
-        Transform::from_xyz(0.0, 4.0, 100.0),
+        Transform::from_xyz(0.0, 6.0, 100.0),
     ));
 }
 
