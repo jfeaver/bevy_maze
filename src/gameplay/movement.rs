@@ -142,18 +142,16 @@ fn apply_movement_in_one_direction(
     let max = Coordinate::from_vec2_floor(collision_area.max());
     for x in min.x..=max.x {
         for y in min.y..=max.y {
-            if let Some(Some(obs_hitbox)) = obstructions.get(&Coordinate::new(x, y)) {
-                if collision_area.intersects(&obs_hitbox) {
-                    let adjusted_travel_to = adjustment_fn(*obs_hitbox, half_girth);
-                    if use_gt {
-                        if travel_to > adjusted_travel_to {
-                            travel_to = adjusted_travel_to;
-                        }
-                    } else {
-                        if travel_to < adjusted_travel_to {
-                            travel_to = adjusted_travel_to;
-                        }
+            if let Some(Some(obs_hitbox)) = obstructions.get(&Coordinate::new(x, y))
+                && collision_area.intersects(obs_hitbox)
+            {
+                let adjusted_travel_to = adjustment_fn(*obs_hitbox, half_girth);
+                if use_gt {
+                    if travel_to > adjusted_travel_to {
+                        travel_to = adjusted_travel_to;
                     }
+                } else if travel_to < adjusted_travel_to {
+                    travel_to = adjusted_travel_to;
                 }
             }
         }
