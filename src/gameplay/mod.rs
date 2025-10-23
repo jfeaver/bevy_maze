@@ -13,7 +13,6 @@ mod player;
 mod utils;
 
 const TILE_DIM: f32 = 1.0;
-const HALF_TILE_DIM: f32 = TILE_DIM / 2.0;
 const SCALE_FACTOR: f32 = TILE_DIM / PIXELS_PER_TILE as f32;
 const ATLAS_COLS: u16 = 15;
 const ATLAS_ROWS: u16 = 15;

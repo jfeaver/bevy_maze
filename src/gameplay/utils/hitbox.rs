@@ -29,10 +29,20 @@ impl Hitbox {
         }
     }
 
+    // Use this when checking for collisions to allow for sliding along a wall
+    // (floating point jitter of resetting positions gets hidden)
     pub fn from_rounded_corners(p0: Vec2, p1: Vec2) -> Self {
         Self {
             rect: Rect::from_corners(p0.map(round_out_float_noise), p1.map(round_out_float_noise)),
         }
+    }
+
+    pub fn min(&self) -> Vec2 {
+        self.rect.min
+    }
+
+    pub fn max(&self) -> Vec2 {
+        self.rect.max
     }
 
     /// Left / minimum x
@@ -65,10 +75,10 @@ impl Hitbox {
         self.y2() - self.y1()
     }
 
-    /// Move the hitbox by `delta`.
-    pub fn translate(&mut self, delta: Vec2) {
-        let min = self.rect.min + delta;
-        let max = self.rect.max + delta;
+    /// Move the hitbox by `translation`.
+    pub fn translate(&mut self, translation: Vec2) {
+        let min = self.rect.min + translation;
+        let max = self.rect.max + translation;
         self.rect = Rect::from_corners(min, max);
     }
 

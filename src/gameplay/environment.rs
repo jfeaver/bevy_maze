@@ -86,8 +86,6 @@ impl WorldMap {
     // Provide a position in world array coordinates
     pub fn at(&self, coordinate: Coordinate) -> Option<&Tile> {
         // Ensure coordinates are within grid bounds
-        debug!("WorldMap.at({:?})", coordinate);
-
         if coordinate.x < MAP_DIM as i32
             && coordinate.x >= 0
             && coordinate.y < MAP_DIM as i32

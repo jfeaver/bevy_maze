@@ -34,7 +34,7 @@ fn spawn_player(mut commands: Commands, sheet: Res<SpriteSheet>) {
         ),
         Anchor::CENTER,
         Transform {
-            translation: render_position_from_world_array_position(6.5 * TILE_DIM, 8.5 * TILE_DIM)
+            translation: render_position_from_world_array_position(5.5 * TILE_DIM, 1.5 * TILE_DIM)
                 .extend(2.0),
             scale: Vec3::splat(crate::gameplay::SCALE_FACTOR),
             ..Default::default()

@@ -1,13 +1,12 @@
-use bevy::prelude::*;
+use bevy::{platform::collections::HashMap, prelude::*};
 
 use crate::{
     AppSystems, PausableSystems,
     gameplay::{
-        HALF_TILE_DIM,
         environment::{WorldMap, coordinate::Coordinate},
         utils::{
-            flipped_y_axis, hitbox::Hitbox, render_x_from_world_array_x,
-            render_y_from_world_array_y, world_array_position_from_render_position,
+            hitbox::Hitbox, render_x_from_world_array_x, render_y_from_world_array_y,
+            world_array_position_from_render_position,
         },
     },
 };
@@ -49,6 +48,116 @@ impl Default for MovementController {
     }
 }
 
+enum Translation {
+    // world array space
+    North(f32), // y < 0
+    South(f32), // y > 0
+    East(f32),  // x > 0
+    West(f32),  // x < 0
+}
+
+fn gather_map_obstructions(
+    hitbox: &Hitbox,
+    world_map: &Res<WorldMap>,
+) -> HashMap<Coordinate, Option<Hitbox>> {
+    let mut obstructions = HashMap::new();
+    let min_x = hitbox.x1().floor() as i32 - 1;
+    let max_x = hitbox.x2().ceil() as i32;
+    let min_y = hitbox.y1().floor() as i32 - 1;
+    let max_y = hitbox.y2().ceil() as i32;
+    for x in min_x..=max_x {
+        for y in min_y..=max_y {
+            let coordinate = Coordinate::new(x, y);
+            if let Some(tile) = world_map.at(coordinate) {
+                if tile.is_obstruction() {
+                    obstructions.insert(coordinate, Some(tile.hitbox(coordinate)));
+                } else {
+                    obstructions.insert(coordinate, None);
+                }
+            } else {
+                obstructions.insert(coordinate, None);
+            }
+        }
+    }
+    obstructions
+}
+
+/// Returns the exact position in that direction that should be traveled to,
+/// to avoid clipping into environment objects. Position returned is in world
+/// array space.
+fn apply_movement_in_one_direction(
+    world_map: &Res<WorldMap>,
+    directional_translation: Translation,
+    hitbox: &Hitbox,  // world array space
+    half_girth: Vec2, // world array space
+) -> f32 {
+    let obstructions = gather_map_obstructions(hitbox, world_map);
+    let mut travel_to: f32;
+    let collision_area: Hitbox; // Newly occupied space
+    let use_gt: bool; // When deciding the furthest we should travel should we eliminate travel further from 0?
+    let adjustment_fn: fn(Hitbox, Vec2) -> f32;
+
+    match directional_translation {
+        Translation::North(y) => {
+            travel_to = hitbox.y1() + y + half_girth.y;
+            collision_area = Hitbox::from_rounded_corners(
+                Vec2::new(hitbox.x1(), hitbox.y1() + y),
+                Vec2::new(hitbox.x2(), hitbox.y1()),
+            );
+            use_gt = false;
+            adjustment_fn = |obs_hitbox, half_girth: Vec2| obs_hitbox.y2() + half_girth.y;
+        }
+        Translation::South(y) => {
+            travel_to = hitbox.y2() + y - half_girth.y;
+            collision_area = Hitbox::from_rounded_corners(
+                Vec2::new(hitbox.x1(), hitbox.y2()),
+                Vec2::new(hitbox.x2(), hitbox.y2() + y),
+            );
+            use_gt = true;
+            adjustment_fn = |obs_hitbox, half_girth: Vec2| obs_hitbox.y1() - half_girth.y;
+        }
+        Translation::East(x) => {
+            travel_to = hitbox.x2() + x - half_girth.x;
+            collision_area = Hitbox::from_rounded_corners(
+                Vec2::new(hitbox.x2(), hitbox.y1()),
+                Vec2::new(hitbox.x2() + x, hitbox.y2()),
+            );
+            use_gt = true;
+            adjustment_fn = |obs_hitbox, half_girth: Vec2| obs_hitbox.x1() - half_girth.x;
+        }
+        Translation::West(x) => {
+            travel_to = hitbox.x1() + x + half_girth.x;
+            collision_area = Hitbox::from_rounded_corners(
+                Vec2::new(hitbox.x1() + x, hitbox.y1()),
+                Vec2::new(hitbox.x1(), hitbox.y2()),
+            );
+            use_gt = false;
+            adjustment_fn = |obs_hitbox, half_girth: Vec2| obs_hitbox.x2() + half_girth.x;
+        }
+    }
+    let min = Coordinate::from_vec2_floor(collision_area.min());
+    let max = Coordinate::from_vec2_floor(collision_area.max());
+    for x in min.x..=max.x {
+        for y in min.y..=max.y {
+            if let Some(Some(obs_hitbox)) = obstructions.get(&Coordinate::new(x, y)) {
+                if collision_area.intersects(&obs_hitbox) {
+                    let adjusted_travel_to = adjustment_fn(*obs_hitbox, half_girth);
+                    if use_gt {
+                        if travel_to > adjusted_travel_to {
+                            travel_to = adjusted_travel_to;
+                        }
+                    } else {
+                        if travel_to < adjusted_travel_to {
+                            travel_to = adjusted_travel_to;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    travel_to
+}
+
 fn apply_movement(
     time: Res<Time>,
     mut movement_query: Query<(&mut MovementController, &mut Transform)>,
@@ -72,77 +181,22 @@ fn apply_movement(
             // Try to move by x
             if translation.x > 0.0 {
                 debug!("x > 0");
-                let x_translation = translation.truncate() * Vec2::X;
-                // The moving entities hitbox
-                hitbox.translate(x_translation);
-                // Find world map obstructions
-                // FIXME: This only checks the nearest tile to the extents of the object but should really check each neighboring tile along the girth (whether that is one tile or more than two).
-                let coordinate = Coordinate::from(
-                    position + Vec2::ZERO.with_x(half_girth.x) - Vec2::ZERO.with_y(half_girth.y)
-                        + Vec2::ZERO.with_x(HALF_TILE_DIM),
+                let x_translation = apply_movement_in_one_direction(
+                    &world_map,
+                    Translation::East(translation.x),
+                    &hitbox,
+                    half_girth,
                 );
-                let coordinate2 = Coordinate::from(
-                    position
-                        + Vec2::ZERO.with_x(half_girth.x)
-                        + Vec2::ZERO.with_y(half_girth.y)
-                        + Vec2::ZERO.with_x(HALF_TILE_DIM),
-                );
-                if let Some(tile) = world_map.at(coordinate)
-                    && let Some(tile2) = world_map.at(coordinate2)
-                {
-                    let tile_obstruction = tile.is_obstruction();
-                    let tile2_obstruction = tile2.is_obstruction();
-                    if !(tile_obstruction || tile2_obstruction) {
-                        transform.translation.x += translation.x;
-                    } else {
-                        let tile_hitbox = tile.hitbox(coordinate);
-                        let tile2_hitbox = tile2.hitbox(coordinate2);
-                        if (tile_obstruction && hitbox.intersects(&tile_hitbox))
-                            || (tile2_obstruction && hitbox.intersects(&tile2_hitbox))
-                        {
-                            transform.translation.x =
-                                render_x_from_world_array_x(tile_hitbox.x1() - half_girth.x);
-                        } else {
-                            transform.translation.x += translation.x;
-                        }
-                    }
-                }
+                transform.translation.x = render_x_from_world_array_x(x_translation);
             } else if translation.x < 0.0 {
                 debug!("x < 0");
-                let x_translation = translation.truncate() * Vec2::X;
-                // The moving entities hitbox
-                hitbox.translate(x_translation);
-                // Find world map obstructions
-                let coordinate = Coordinate::from(
-                    position
-                        - Vec2::ZERO.with_x(half_girth.x)
-                        - Vec2::ZERO.with_y(half_girth.y)
-                        - Vec2::ZERO.with_x(HALF_TILE_DIM),
+                let x_translation = apply_movement_in_one_direction(
+                    &world_map,
+                    Translation::West(translation.x),
+                    &hitbox,
+                    half_girth,
                 );
-                let coordinate2 = Coordinate::from(
-                    position - Vec2::ZERO.with_x(half_girth.x) + Vec2::ZERO.with_y(half_girth.y)
-                        - Vec2::ZERO.with_x(HALF_TILE_DIM),
-                );
-                if let Some(tile) = world_map.at(coordinate)
-                    && let Some(tile2) = world_map.at(coordinate2)
-                {
-                    let tile_obstruction = tile.is_obstruction();
-                    let tile2_obstruction = tile2.is_obstruction();
-                    if !(tile_obstruction || tile2_obstruction) {
-                        transform.translation.x += translation.x;
-                    } else {
-                        let tile_hitbox = tile.hitbox(coordinate);
-                        let tile2_hitbox = tile2.hitbox(coordinate2);
-                        if (tile_obstruction && hitbox.intersects(&tile_hitbox))
-                            || (tile2_obstruction && hitbox.intersects(&tile2_hitbox))
-                        {
-                            transform.translation.x =
-                                render_x_from_world_array_x(tile_hitbox.x2() + half_girth.x);
-                        } else {
-                            transform.translation.x += translation.x;
-                        }
-                    }
-                }
+                transform.translation.x = render_x_from_world_array_x(x_translation);
             }
             // Reset hitbox in case movement didn't proceed fully in x direction
             // TODO: Optimization opportunity?
@@ -154,80 +208,25 @@ fn apply_movement(
             // Try to move by y
             if translation.y > 0.0 {
                 debug!("y > 0");
-                let y_translation = translation.truncate() * Vec2::Y;
-                // The moving entities hitbox
-                hitbox.translate(y_translation);
-                // Find world map obstructions
-                let coordinate = Coordinate::from(
-                    position + Vec2::ZERO.with_y(half_girth.y) - Vec2::ZERO.with_x(half_girth.x)
-                        + Vec2::ZERO.with_y(HALF_TILE_DIM),
+                let y_translation = apply_movement_in_one_direction(
+                    &world_map,
+                    Translation::South(translation.y),
+                    &hitbox,
+                    half_girth,
                 );
-                let coordinate2 = Coordinate::from(
-                    position
-                        + Vec2::ZERO.with_y(half_girth.y)
-                        + Vec2::ZERO.with_x(half_girth.x)
-                        + Vec2::ZERO.with_y(HALF_TILE_DIM),
-                );
-                if let Some(tile) = world_map.at(coordinate)
-                    && let Some(tile2) = world_map.at(coordinate2)
-                {
-                    let tile_obstruction = tile.is_obstruction();
-                    let tile2_obstruction = tile2.is_obstruction();
-                    if !(tile_obstruction || tile2_obstruction) {
-                        transform.translation.y += flipped_y_axis(translation.y);
-                    } else {
-                        let tile_hitbox = tile.hitbox(coordinate);
-                        let tile2_hitbox = tile2.hitbox(coordinate2);
-                        if (tile_obstruction && hitbox.intersects(&tile_hitbox))
-                            || (tile2_obstruction && hitbox.intersects(&tile2_hitbox))
-                        {
-                            transform.translation.y =
-                                render_y_from_world_array_y(tile_hitbox.y1() - half_girth.y);
-                        } else {
-                            transform.translation.y += flipped_y_axis(translation.y);
-                        }
-                    }
-                }
+                transform.translation.y = render_y_from_world_array_y(y_translation);
             } else if translation.y < 0.0 {
                 debug!("y < 0");
-                let y_translation = translation.truncate() * Vec2::Y;
-                // The moving entities hitbox
-                hitbox.translate(y_translation);
-                // Find world map obstructions
-                let coordinate = Coordinate::from(
-                    position
-                        - Vec2::ZERO.with_y(half_girth.y)
-                        - Vec2::ZERO.with_x(half_girth.x)
-                        - Vec2::ZERO.with_y(HALF_TILE_DIM),
+                let y_translation = apply_movement_in_one_direction(
+                    &world_map,
+                    Translation::North(translation.y),
+                    &hitbox,
+                    half_girth,
                 );
-                let coordinate2 = Coordinate::from(
-                    position - Vec2::ZERO.with_y(half_girth.y) + Vec2::ZERO.with_x(half_girth.x)
-                        - Vec2::ZERO.with_y(HALF_TILE_DIM),
-                );
-                if let Some(tile) = world_map.at(coordinate)
-                    && let Some(tile2) = world_map.at(coordinate2)
-                {
-                    let tile_obstruction = tile.is_obstruction();
-                    let tile2_obstruction = tile2.is_obstruction();
-                    if !(tile_obstruction || tile2_obstruction) {
-                        transform.translation.y += flipped_y_axis(translation.y);
-                    } else {
-                        let tile_hitbox = tile.hitbox(coordinate);
-                        let tile2_hitbox = tile2.hitbox(coordinate2);
-                        if (tile_obstruction && hitbox.intersects(&tile_hitbox))
-                            || (tile2_obstruction && hitbox.intersects(&tile2_hitbox))
-                        {
-                            transform.translation.y =
-                                render_y_from_world_array_y(tile_hitbox.y2() + half_girth.y);
-                        } else {
-                            transform.translation.y += flipped_y_axis(translation.y);
-                        }
-                    }
-                }
+                transform.translation.y = render_y_from_world_array_y(y_translation);
             }
         } else {
             todo!("Non-Hitbox movement is not implemented.")
         }
-        debug!("OK")
     }
 }
