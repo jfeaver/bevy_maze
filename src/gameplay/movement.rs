@@ -56,17 +56,21 @@ enum Translation {
     West(f32),  // x < 0
 }
 
-fn gather_map_obstructions(
-    hitbox: &Hitbox,
-    world_map: &Res<WorldMap>,
-) -> HashMap<Coordinate, Option<Hitbox>> {
-    let mut obstructions = HashMap::new();
+fn hitbox_surroundings(hitbox: &Hitbox) -> (Coordinate, Coordinate) {
     let min_x = hitbox.x1().floor() as i32 - 1;
     let max_x = hitbox.x2().ceil() as i32;
     let min_y = hitbox.y1().floor() as i32 - 1;
     let max_y = hitbox.y2().ceil() as i32;
-    for x in min_x..=max_x {
-        for y in min_y..=max_y {
+    (Coordinate::new(min_x, min_y), Coordinate::new(max_x, max_y))
+}
+
+fn gather_map_obstructions(
+    surroundings: &(Coordinate, Coordinate),
+    world_map: &Res<WorldMap>,
+) -> HashMap<Coordinate, Option<Hitbox>> {
+    let mut obstructions = HashMap::new();
+    for x in surroundings.0.x..=surroundings.1.x {
+        for y in surroundings.0.y..=surroundings.1.y {
             let coordinate = Coordinate::new(x, y);
             if let Some(tile) = world_map.at(coordinate) {
                 if tile.is_obstruction() {
@@ -86,12 +90,11 @@ fn gather_map_obstructions(
 /// to avoid clipping into environment objects. Position returned is in world
 /// array space.
 fn apply_movement_in_one_direction(
-    world_map: &Res<WorldMap>,
+    obstructions: &HashMap<Coordinate, Option<Hitbox>>,
     directional_translation: Translation,
     hitbox: &Hitbox,  // world array space
     half_girth: Vec2, // world array space
 ) -> f32 {
-    let obstructions = gather_map_obstructions(hitbox, world_map);
     let mut travel_to: f32;
     let collision_area: Hitbox; // Newly occupied space
     let use_gt: bool; // When deciding the furthest we should travel should we eliminate travel further from 0?
@@ -178,11 +181,13 @@ fn apply_movement(
             let half_girth = girth / 2.0;
             let mut hitbox =
                 Hitbox::from_rounded_corners(position - half_girth, position + half_girth);
+            let surroundings = hitbox_surroundings(&hitbox);
+            let mut obstructions = gather_map_obstructions(&surroundings, &world_map);
             // Try to move by x
             if translation.x > 0.0 {
                 debug!("x > 0");
                 let x_translation = apply_movement_in_one_direction(
-                    &world_map,
+                    &obstructions,
                     Translation::East(translation.x),
                     &hitbox,
                     half_girth,
@@ -191,7 +196,7 @@ fn apply_movement(
             } else if translation.x < 0.0 {
                 debug!("x < 0");
                 let x_translation = apply_movement_in_one_direction(
-                    &world_map,
+                    &obstructions,
                     Translation::West(translation.x),
                     &hitbox,
                     half_girth,
@@ -205,11 +210,15 @@ fn apply_movement(
                 transform.translation.y,
             );
             hitbox = Hitbox::from_rounded_corners(position - half_girth, position + half_girth);
+            let updated_surroundings = hitbox_surroundings(&hitbox);
+            if updated_surroundings != surroundings {
+                obstructions = gather_map_obstructions(&surroundings, &world_map);
+            }
             // Try to move by y
             if translation.y > 0.0 {
                 debug!("y > 0");
                 let y_translation = apply_movement_in_one_direction(
-                    &world_map,
+                    &obstructions,
                     Translation::South(translation.y),
                     &hitbox,
                     half_girth,
@@ -218,7 +227,7 @@ fn apply_movement(
             } else if translation.y < 0.0 {
                 debug!("y < 0");
                 let y_translation = apply_movement_in_one_direction(
-                    &world_map,
+                    &obstructions,
                     Translation::North(translation.y),
                     &hitbox,
                     half_girth,
