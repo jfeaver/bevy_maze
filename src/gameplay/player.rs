@@ -1,4 +1,4 @@
-use bevy::{color::Srgba, prelude::*, sprite::Anchor};
+use bevy::{prelude::*, sprite::Anchor};
 
 use crate::{
     AppSystems, PausableSystems,
@@ -16,8 +16,6 @@ pub(super) fn plugin(app: &mut App) {
             .in_set(AppSystems::RecordInput)
             .in_set(PausableSystems),
     );
-    app.add_systems(OnEnter(Screen::Gameplay), spawn_player_anchor);
-    app.add_systems(Update, update_player_anchor);
     app.add_systems(OnEnter(Screen::Gameplay), spawn_player);
 }
 
@@ -84,35 +82,5 @@ fn record_player_directional_input(
     // Apply movement intent to controllers.
     for mut controller in &mut controller_query {
         controller.intent = intent;
-    }
-}
-
-#[derive(Component)]
-struct PlayerAnchor;
-
-fn spawn_player_anchor(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
-) {
-    // Create a small circle mesh
-    commands.spawn((
-        Name::new("Player Anchor"),
-        PlayerAnchor,
-        Mesh2d(meshes.add(Circle::new(0.03 * TILE_DIM))),
-        MeshMaterial2d(materials.add(ColorMaterial::from_color(Srgba::new(1.0, 0.0, 0.0, 1.0)))),
-        Transform::from_xyz(0.0, 6.0, 100.0),
-        DespawnOnExit(Screen::Gameplay),
-    ));
-}
-
-fn update_player_anchor(
-    player_query: Query<&Transform, With<Player>>,
-    mut circle_query: Query<&mut Transform, (With<PlayerAnchor>, Without<Player>)>,
-) {
-    if let (Ok(player_tf), Ok(mut circle_tf)) = (player_query.single(), circle_query.single_mut()) {
-        // Move the circle to match the player's position
-        circle_tf.translation.x = player_tf.translation.x;
-        circle_tf.translation.y = player_tf.translation.y;
     }
 }
