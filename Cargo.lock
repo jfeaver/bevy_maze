@@ -7,8 +7,6 @@ name = "BevyMaze"
 version = "0.1.2"
 dependencies = [
  "bevy",
- "getrandom",
- "rand",
  "tracing",
 ]
 
