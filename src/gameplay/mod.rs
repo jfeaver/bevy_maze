@@ -3,6 +3,7 @@
 use crate::{
     PIXELS_PER_TILE,
     gameplay::environment::WorldMap,
+    screens::Screen,
     utils::tile_mesh::{AtlasConfig, build_tile_mesh},
 };
 use bevy::prelude::*;
@@ -75,5 +76,6 @@ pub(crate) fn spawn_environment(
         Mesh2d(tile_mesh),
         MeshMaterial2d(material),
         Transform::from_xyz(0.0, -TILE_DIM, 0.0), // Account for Bevy using Y-Up coordinates and us using Y-Down
+        DespawnOnExit(Screen::Gameplay),
     ));
 }

@@ -43,6 +43,7 @@ fn spawn_player(mut commands: Commands, sheet: Res<SpriteSheet>) {
             girth: Some(Vec2::ONE * 0.8 * TILE_DIM),
             ..Default::default()
         },
+        DespawnOnExit(Screen::Gameplay),
     ));
 }
 
@@ -101,6 +102,7 @@ fn spawn_player_anchor(
         Mesh2d(meshes.add(Circle::new(0.03 * TILE_DIM))),
         MeshMaterial2d(materials.add(ColorMaterial::from_color(Srgba::new(1.0, 0.0, 0.0, 1.0)))),
         Transform::from_xyz(0.0, 6.0, 100.0),
+        DespawnOnExit(Screen::Gameplay),
     ));
 }
 
