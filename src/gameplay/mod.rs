@@ -8,6 +8,7 @@ use crate::{
 };
 use bevy::prelude::*;
 
+mod animation;
 mod environment;
 mod movement;
 mod player;
@@ -24,14 +25,10 @@ pub struct SpriteSheet {
     layout: Handle<TextureAtlasLayout>,
 }
 
-trait AtlasIndex {
-    fn atlas_index(&self) -> Option<usize>;
-}
-
 pub(super) fn plugin(app: &mut App) {
     app.init_resource::<WorldMap>();
     app.init_resource::<SpriteSheet>();
-    app.add_plugins((player::plugin, movement::plugin));
+    app.add_plugins((animation::plugin, player::plugin, movement::plugin));
 }
 
 impl FromWorld for SpriteSheet {

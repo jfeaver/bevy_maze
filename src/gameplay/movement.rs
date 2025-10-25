@@ -3,7 +3,7 @@ use bevy::{platform::collections::HashMap, prelude::*};
 use crate::{
     AppSystems, PausableSystems,
     gameplay::{
-        environment::{WorldMap, coordinate::Coordinate},
+        environment::{Direction, WorldMap, coordinate::Coordinate},
         utils::{
             hitbox::Hitbox, render_x_from_world_array_x, render_y_from_world_array_y,
             world_array_position_from_render_position,
@@ -48,14 +48,6 @@ impl Default for MovementController {
     }
 }
 
-enum Translation {
-    // world array space
-    North(f32), // y < 0
-    South(f32), // y > 0
-    East(f32),  // x > 0
-    West(f32),  // x < 0
-}
-
 fn hitbox_surroundings(hitbox: &Hitbox) -> (Coordinate, Coordinate) {
     let min_x = hitbox.x1().floor() as i32 - 1;
     let max_x = hitbox.x2().ceil() as i32;
@@ -91,7 +83,7 @@ fn gather_map_obstructions(
 /// array space.
 fn apply_movement_in_one_direction(
     obstructions: &HashMap<Coordinate, Option<Hitbox>>,
-    directional_translation: Translation,
+    directional_translation: (Direction, f32),
     hitbox: &Hitbox,  // world array space
     half_girth: Vec2, // world array space
 ) -> f32 {
@@ -101,7 +93,7 @@ fn apply_movement_in_one_direction(
     let adjustment_fn: fn(Hitbox, Vec2) -> f32;
 
     match directional_translation {
-        Translation::North(y) => {
+        (Direction::North, y) => {
             travel_to = hitbox.y1() + y + half_girth.y;
             collision_area = Hitbox::from_rounded_corners(
                 Vec2::new(hitbox.x1(), hitbox.y1() + y),
@@ -110,7 +102,7 @@ fn apply_movement_in_one_direction(
             use_gt = false;
             adjustment_fn = |obs_hitbox, half_girth: Vec2| obs_hitbox.y2() + half_girth.y;
         }
-        Translation::South(y) => {
+        (Direction::South, y) => {
             travel_to = hitbox.y2() + y - half_girth.y;
             collision_area = Hitbox::from_rounded_corners(
                 Vec2::new(hitbox.x1(), hitbox.y2()),
@@ -119,7 +111,7 @@ fn apply_movement_in_one_direction(
             use_gt = true;
             adjustment_fn = |obs_hitbox, half_girth: Vec2| obs_hitbox.y1() - half_girth.y;
         }
-        Translation::East(x) => {
+        (Direction::East, x) => {
             travel_to = hitbox.x2() + x - half_girth.x;
             collision_area = Hitbox::from_rounded_corners(
                 Vec2::new(hitbox.x2(), hitbox.y1()),
@@ -128,7 +120,7 @@ fn apply_movement_in_one_direction(
             use_gt = true;
             adjustment_fn = |obs_hitbox, half_girth: Vec2| obs_hitbox.x1() - half_girth.x;
         }
-        Translation::West(x) => {
+        (Direction::West, x) => {
             travel_to = hitbox.x1() + x + half_girth.x;
             collision_area = Hitbox::from_rounded_corners(
                 Vec2::new(hitbox.x1() + x, hitbox.y1()),
@@ -186,7 +178,7 @@ fn apply_movement(
                 debug!("x > 0");
                 let x_translation = apply_movement_in_one_direction(
                     &obstructions,
-                    Translation::East(translation.x),
+                    (Direction::East, translation.x),
                     &hitbox,
                     half_girth,
                 );
@@ -195,7 +187,7 @@ fn apply_movement(
                 debug!("x < 0");
                 let x_translation = apply_movement_in_one_direction(
                     &obstructions,
-                    Translation::West(translation.x),
+                    (Direction::West, translation.x),
                     &hitbox,
                     half_girth,
                 );
@@ -217,7 +209,7 @@ fn apply_movement(
                 debug!("y > 0");
                 let y_translation = apply_movement_in_one_direction(
                     &obstructions,
-                    Translation::South(translation.y),
+                    (Direction::South, translation.y),
                     &hitbox,
                     half_girth,
                 );
@@ -226,7 +218,7 @@ fn apply_movement(
                 debug!("y < 0");
                 let y_translation = apply_movement_in_one_direction(
                     &obstructions,
-                    Translation::North(translation.y),
+                    (Direction::North, translation.y),
                     &hitbox,
                     half_girth,
                 );

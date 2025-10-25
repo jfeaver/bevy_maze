@@ -3,8 +3,8 @@ use bevy::{prelude::*, sprite::Anchor};
 use crate::{
     AppSystems, PausableSystems,
     gameplay::{
-        AtlasIndex, SpriteSheet, TILE_DIM, movement::MovementController,
-        utils::render_position_from_world_array_position,
+        SpriteSheet, TILE_DIM, animation::PlayerAnimation, environment::Direction,
+        movement::MovementController, utils::render_position_from_world_array_position,
     },
     screens::Screen,
 };
@@ -20,6 +20,8 @@ pub(super) fn plugin(app: &mut App) {
 }
 
 fn spawn_player(mut commands: Commands, sheet: Res<SpriteSheet>) {
+    let player_animation = PlayerAnimation::new(Direction::South);
+
     commands.spawn((
         Name::new("Player"),
         Player,
@@ -27,9 +29,10 @@ fn spawn_player(mut commands: Commands, sheet: Res<SpriteSheet>) {
             sheet.texture.clone(),
             TextureAtlas {
                 layout: sheet.layout.clone(),
-                index: Player.atlas_index().unwrap_or(0),
+                index: player_animation.get_atlas_index(),
             },
         ),
+        player_animation,
         Anchor::CENTER,
         Transform {
             translation: render_position_from_world_array_position(5.5 * TILE_DIM, 1.5 * TILE_DIM)
@@ -48,12 +51,6 @@ fn spawn_player(mut commands: Commands, sheet: Res<SpriteSheet>) {
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Default, Reflect)]
 #[reflect(Component)]
 struct Player;
-
-impl AtlasIndex for Player {
-    fn atlas_index(&self) -> Option<usize> {
-        Some(105)
-    }
-}
 
 // NOTE: This creates intent in world array coordinate space
 fn record_player_directional_input(
