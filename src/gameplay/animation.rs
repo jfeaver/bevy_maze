@@ -24,27 +24,33 @@ pub(super) fn plugin(app: &mut App) {
 }
 
 /// Update the sprite direction and animation state (idling/walking).
-fn update_animation_movement(mut player_query: Query<(&MovementController, &mut PlayerAnimation)>) {
-    for (controller, mut animation) in &mut player_query {
-        let animation_state = if controller.intent == Vec2::ZERO {
+fn update_animation_movement(
+    mut player_query: Query<(&MovementController, &mut PlayerAnimation, &mut Sprite)>,
+) {
+    for (controller, mut animation, sprite) in &mut player_query {
+        let maybe_animation_state = if controller.intent == Vec2::ZERO {
             match &animation.state {
                 PlayerAnimationState::Idling(direction) => {
-                    PlayerAnimationState::Idling(direction.clone())
+                    Some(PlayerAnimationState::Idling(direction.clone()))
                 }
                 PlayerAnimationState::Walking(direction) => {
-                    PlayerAnimationState::Idling(direction.clone())
+                    Some(PlayerAnimationState::Idling(direction.clone()))
                 }
             }
         } else if controller.intent.y < 0.0 && controller.intent.x == 0.0 {
-            PlayerAnimationState::Walking(Direction::North)
+            Some(PlayerAnimationState::Walking(Direction::North))
         } else if controller.intent.y > 0.0 && controller.intent.x == 0.0 {
-            PlayerAnimationState::Walking(Direction::South)
-        } else if controller.intent.x < 0.0 {
-            PlayerAnimationState::Walking(Direction::West)
+            Some(PlayerAnimationState::Walking(Direction::South))
+        } else if controller.intent.x < 0.0 && controller.intent.y == 0.0 {
+            Some(PlayerAnimationState::Walking(Direction::West))
+        } else if controller.intent.x > 0.0 && controller.intent.y == 0.0 {
+            Some(PlayerAnimationState::Walking(Direction::East))
         } else {
-            PlayerAnimationState::Walking(Direction::East)
+            None
         };
-        animation.update_state(animation_state);
+        if let Some(animation_state) = maybe_animation_state {
+            animation.update_state(animation_state, sprite);
+        }
     }
 }
 
@@ -127,11 +133,14 @@ impl PlayerAnimation {
     }
 
     /// Update animation state if it changes.
-    pub fn update_state(&mut self, state: PlayerAnimationState) {
+    pub fn update_state(&mut self, state: PlayerAnimationState, mut sprite: Mut<Sprite>) {
         if self.state != state {
             match state {
                 PlayerAnimationState::Idling(direction) => *self = Self::idling(direction),
                 PlayerAnimationState::Walking(direction) => *self = Self::walking(direction),
+            }
+            if let Some(atlas) = sprite.texture_atlas.as_mut() {
+                atlas.index = self.get_atlas_index();
             }
         }
     }

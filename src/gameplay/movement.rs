@@ -166,7 +166,7 @@ fn apply_movement(
             transform.translation.x,
             transform.translation.y,
         );
-        debug!("Position: {:?}", position);
+        // debug!("Position: {:?}", position);
         if let Some(girth) = controller.girth {
             let half_girth = girth / 2.0;
             let mut hitbox =
@@ -175,7 +175,7 @@ fn apply_movement(
             let mut obstructions = gather_map_obstructions(&surroundings, &world_map);
             // Try to move by x
             if translation.x > 0.0 {
-                debug!("x > 0");
+                // debug!("x > 0");
                 let x_translation = apply_movement_in_one_direction(
                     &obstructions,
                     (Direction::East, translation.x),
@@ -184,7 +184,7 @@ fn apply_movement(
                 );
                 transform.translation.x = render_x_from_world_array_x(x_translation);
             } else if translation.x < 0.0 {
-                debug!("x < 0");
+                // debug!("x < 0");
                 let x_translation = apply_movement_in_one_direction(
                     &obstructions,
                     (Direction::West, translation.x),
@@ -206,7 +206,7 @@ fn apply_movement(
             }
             // Try to move by y
             if translation.y > 0.0 {
-                debug!("y > 0");
+                // debug!("y > 0");
                 let y_translation = apply_movement_in_one_direction(
                     &obstructions,
                     (Direction::South, translation.y),
@@ -215,7 +215,7 @@ fn apply_movement(
                 );
                 transform.translation.y = render_y_from_world_array_y(y_translation);
             } else if translation.y < 0.0 {
-                debug!("y < 0");
+                // debug!("y < 0");
                 let y_translation = apply_movement_in_one_direction(
                     &obstructions,
                     (Direction::North, translation.y),
