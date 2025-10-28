@@ -40,6 +40,10 @@ fn assets() -> impl Bundle {
         ["Button SFX", "CC0 by Jaszunio15"],
         ["Music", "CC BY 3.0 by Kevin MacLeod"],
         [
+            "Dialogue Framework",
+            "MIT - Powered by Yarn Spinner — https://yarnspinner.dev",
+        ],
+        [
             "Bevy logo",
             "All rights reserved by the Bevy Foundation, permission granted for splash screen use when unmodified",
         ],
