@@ -3,11 +3,17 @@
 use crate::{
     PIXELS_PER_TILE,
     gameplay::environment::WorldMap,
-    utils::tile_mesh::{AtlasConfig, build_tile_mesh},
+    screens::Screen,
+    utils::{
+        Z,
+        tile_mesh::{AtlasConfig, build_tile_mesh},
+    },
 };
 use bevy::prelude::*;
 
+mod animation;
 mod environment;
+mod maze;
 mod movement;
 mod player;
 mod utils;
@@ -23,14 +29,15 @@ pub struct SpriteSheet {
     layout: Handle<TextureAtlasLayout>,
 }
 
-trait AtlasIndex {
-    fn atlas_index(&self) -> Option<usize>;
-}
-
 pub(super) fn plugin(app: &mut App) {
     app.init_resource::<WorldMap>();
     app.init_resource::<SpriteSheet>();
-    app.add_plugins((player::plugin, movement::plugin));
+    app.add_plugins((
+        animation::plugin,
+        player::plugin,
+        maze::plugin,
+        movement::plugin,
+    ));
 }
 
 impl FromWorld for SpriteSheet {
@@ -74,6 +81,7 @@ pub(crate) fn spawn_environment(
         Name::new("Environment"),
         Mesh2d(tile_mesh),
         MeshMaterial2d(material),
-        Transform::from_xyz(0.0, -TILE_DIM, 0.0), // Account for Bevy using Y-Up coordinates and us using Y-Down
+        Transform::from_xyz(0.0, -TILE_DIM, Z.ground), // Account for Bevy using Y-Up coordinates and us using Y-Down
+        DespawnOnExit(Screen::Gameplay),
     ));
 }

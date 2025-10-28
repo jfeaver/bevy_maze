@@ -6,13 +6,21 @@ use coordinate::Coordinate;
 use crate::{
     SCREEN_DIM as MAP_DIM,
     gameplay::{
-        AtlasIndex, TILE_DIM,
+        TILE_DIM,
         utils::{hitbox::Hitbox, render_position_from_world_array_position},
     },
 };
 
 pub mod coordinate;
 mod world_map_array;
+
+#[derive(Reflect, PartialEq, Clone)]
+pub enum Direction {
+    North,
+    South,
+    East,
+    West,
+}
 
 #[derive(Reflect, Debug)]
 pub(in crate::gameplay) enum GroundType {
@@ -32,7 +40,7 @@ pub(in crate::gameplay) enum ObstructionType {
     Rock3,
 }
 
-impl AtlasIndex for GroundType {
+impl GroundType {
     fn atlas_index(&self) -> Option<usize> {
         match self {
             GroundType::Grass => Some(2),
@@ -42,7 +50,7 @@ impl AtlasIndex for GroundType {
     }
 }
 
-impl AtlasIndex for ObstructionType {
+impl ObstructionType {
     fn atlas_index(&self) -> Option<usize> {
         match self {
             ObstructionType::None => None,

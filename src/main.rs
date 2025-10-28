@@ -40,8 +40,8 @@ impl Plugin for AppPlugin {
                 })
                 .set(WindowPlugin {
                     primary_window: Some(Window {
-                        title: "Maze".to_string(),
-                        name: Some("Maze".into()),
+                        title: "BevyMaze".to_string(),
+                        name: Some("BevyMaze".into()),
                         // Tells Wasm to resize the window according to the available canvas
                         fit_canvas_to_parent: true,
                         // Tells Wasm not to override default event handling, like F5, Ctrl+R etc.
