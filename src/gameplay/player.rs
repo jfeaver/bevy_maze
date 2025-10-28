@@ -7,6 +7,7 @@ use crate::{
         movement::MovementController, utils::render_position_from_world_array_position,
     },
     screens::Screen,
+    utils::Z,
 };
 
 pub(super) fn plugin(app: &mut App) {
@@ -20,7 +21,7 @@ pub(super) fn plugin(app: &mut App) {
 }
 
 fn spawn_player(mut commands: Commands, sheet: Res<SpriteSheet>) {
-    let player_animation = PlayerAnimation::new(Direction::South);
+    let player_animation = PlayerAnimation::new(Direction::East);
 
     commands.spawn((
         Name::new("Player"),
@@ -35,8 +36,8 @@ fn spawn_player(mut commands: Commands, sheet: Res<SpriteSheet>) {
         player_animation,
         Anchor::CENTER,
         Transform {
-            translation: render_position_from_world_array_position(5.5 * TILE_DIM, 1.5 * TILE_DIM)
-                .extend(2.0),
+            translation: render_position_from_world_array_position(0.5 * TILE_DIM, 9.0 * TILE_DIM)
+                .extend(Z.player),
             scale: Vec3::splat(crate::gameplay::SCALE_FACTOR),
             ..Default::default()
         },
@@ -50,7 +51,7 @@ fn spawn_player(mut commands: Commands, sheet: Res<SpriteSheet>) {
 
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Default, Reflect)]
 #[reflect(Component)]
-struct Player;
+pub struct Player;
 
 // NOTE: This creates intent in world array coordinate space
 fn record_player_directional_input(

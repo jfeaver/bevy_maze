@@ -87,6 +87,14 @@ impl Hitbox {
         point.x >= self.x1() && point.x <= self.x2() && point.y >= self.y1() && point.y <= self.y2()
     }
 
+    /// Check whether another hitbox is inside (inclusive) this hitbox.
+    pub fn contains_hitbox(&self, other: Hitbox) -> bool {
+        other.x1() >= self.x1()
+            && other.x2() <= self.x2()
+            && other.y1() >= self.y1()
+            && other.y2() <= self.y2()
+    }
+
     /// AABB intersection test with another hitbox.
     pub fn intersects(&self, other: &Hitbox) -> bool {
         self.y1() < other.y2()
