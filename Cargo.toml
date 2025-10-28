@@ -6,6 +6,8 @@ edition = "2024"
 
 [dependencies]
 bevy = { version = "0.17" }
+bevy_yarnspinner = "0.6.0"
+bevy_yarnspinner_example_dialogue_view = "0.6.0"
 # rand = "0.9"
 # Compile out low-severity logs to improve performance.
 # Remove these features if you want to profile your game with tracy.
