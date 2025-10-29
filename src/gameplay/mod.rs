@@ -2,6 +2,7 @@
 
 use crate::{
     PIXELS_PER_TILE,
+    asset_tracking::LoadResource,
     gameplay::environment::WorldMap,
     screens::Screen,
     utils::{
@@ -31,7 +32,7 @@ pub struct SpriteSheet {
 
 pub(super) fn plugin(app: &mut App) {
     app.init_resource::<WorldMap>();
-    app.init_resource::<SpriteSheet>();
+    app.load_resource::<SpriteSheet>();
     app.add_plugins((
         animation::plugin,
         player::plugin,
